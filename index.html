@@ -333,9 +333,7 @@
   <script>
     const CANVAS_W = 1080;
     const CANVAS_H = 1350;
-
-    // Datei lokal im gleichen Ordner wie die HTML-Datei ablegen
-    const BG_URL = 'Background_TA.png';
+    const BG_URL = 'https://diemittewilsl.github.io/testimonial_ta.web/Background_TA.png';
 
     const SUPPORTER_CIRCLE = { cx: 179, cy: 1143, r: 88 };
     const SUPPORTER_BORDER = { width: 10, color: '#ff1b00' };
@@ -362,11 +360,9 @@
     const orgCount = document.getElementById('orgCount');
 
     const bgImg = new Image();
-    const candidateImg = new Image();
-    candidateImg.crossOrigin = 'anonymous';
+    bgImg.crossOrigin = 'anonymous';
 
     let bgLoaded = false;
-    let candidateLoaded = false;
     let userImg = null;
 
     let baseScale = 1;
@@ -510,33 +506,6 @@
       ctx.restore();
     }
 
-    function drawCandidate() {
-      if (!candidateLoaded) return;
-
-      // Nur das kleine Portrait im Hintergrund abdecken
-      ctx.save();
-      ctx.fillStyle = '#f2b12c';
-      ctx.fillRect(735, 148, 128, 118);
-      ctx.restore();
-
-      const maxW = 355;
-      const maxH = 505;
-      const ratio = Math.min(maxW / candidateImg.naturalWidth, maxH / candidateImg.naturalHeight);
-
-      const w = candidateImg.naturalWidth * ratio;
-      const h = candidateImg.naturalHeight * ratio;
-      const x = 666;
-      const y = 134;
-
-      ctx.save();
-      ctx.shadowColor = 'rgba(255,255,255,1)';
-      ctx.shadowBlur = 7;
-      ctx.drawImage(candidateImg, x, y, w, h);
-      ctx.restore();
-
-      ctx.drawImage(candidateImg, x, y, w, h);
-    }
-
     function drawQuoteText() {
       const rawText = (inputQuote.value || 'Weil er pragmatisch und proaktiv ist!').trim();
       const text = rawText || 'Weil er pragmatisch und proaktiv ist!';
@@ -544,28 +513,42 @@
       ctx.save();
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = 'italic 700 32px Arial';
       ctx.fillStyle = '#111111';
 
-      const lines = wrapTextByWidth(ctx, text, 620);
-      const maxLineWidth = Math.max(...lines.map(line => ctx.measureText(line).width), 0);
-
-      const paddingX = 42;
-      const paddingY = 26;
-      const boxW = Math.max(620, Math.min(860, maxLineWidth + paddingX * 2));
-      const boxH = Math.max(118, lines.length * 42 + paddingY * 2);
-
-      // Rechts bündig wie im Referenzbild
+      const boxW = 920;
+      const boxH = 176;
       const boxX = CANVAS_W - boxW;
       const boxY = 642;
 
       roundRectCustom(ctx, boxX, boxY, boxW, boxH, 36, 0, 0, 36, '#ffffff');
 
-      const totalHeight = lines.length * 42;
-      const startY = boxY + boxH / 2 - totalHeight / 2 + 21;
+      const paddingX = 80;
+      const paddingY = 34;
+      const maxTextWidth = boxW - paddingX * 2;
+
+      let fontSize = 68;
+      const minFontSize = 40;
+      let lines = [];
+
+      while (fontSize >= minFontSize) {
+        ctx.font = `italic 700 ${fontSize}px Arial`;
+        lines = wrapTextByWidth(ctx, text, maxTextWidth);
+
+        const widest = Math.max(...lines.map(line => ctx.measureText(line).width), 0);
+
+        if (lines.length <= 2 && widest <= maxTextWidth) break;
+        if (lines.length === 3 && widest <= maxTextWidth && fontSize <= 52) break;
+
+        fontSize -= 2;
+      }
+
+      const lineHeight = Math.round(fontSize * 1.22);
+      const totalHeight = lines.length * lineHeight;
+      const innerHeight = boxH - paddingY * 2;
+      const startY = boxY + paddingY + (innerHeight - totalHeight) / 2 + lineHeight / 2 + 2;
 
       lines.forEach((line, i) => {
-        ctx.fillText(line, boxX + boxW / 2, startY + i * 42);
+        ctx.fillText(line, boxX + boxW / 2, startY + i * lineHeight);
       });
 
       ctx.restore();
@@ -621,12 +604,15 @@
       ctx.textAlign = 'left';
       ctx.textBaseline = 'alphabetic';
 
-      ctx.font = '700 24px Arial';
-      ctx.fillText(name, 301, 1118);
+      const startY = 1120;
+      const lineHeight = 42;
 
-      ctx.font = '400 18px Arial';
-      ctx.fillText(role, 301, 1147);
-      ctx.fillText(org, 301, 1174);
+      ctx.font = '700 34px Arial';
+      ctx.fillText(name, 301, startY);
+
+      ctx.font = '400 28px Arial';
+      ctx.fillText(role, 301, startY + lineHeight);
+      ctx.fillText(org, 301, startY + lineHeight * 2);
 
       ctx.restore();
     }
@@ -642,7 +628,6 @@
           ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
         }
 
-        drawCandidate();
         drawQuoteText();
         drawSupporter();
       } catch (err) {
@@ -786,25 +771,12 @@
 
     bgImg.onerror = () => {
       bgLoaded = false;
-      setStatus('Background_TA.png konnte nicht geladen werden. Bitte prüfen, ob die Datei im gleichen Ordner liegt.');
-      render();
-    };
-
-    candidateImg.onload = () => {
-      candidateLoaded = true;
-      hideStatus();
-      render();
-    };
-
-    candidateImg.onerror = () => {
-      candidateLoaded = false;
-      setStatus('Das Kandidatenbild konnte nicht geladen werden.');
+      setStatus('Das Hintergrundbild konnte nicht geladen werden.');
       render();
     };
 
     updateCounters();
     bgImg.src = BG_URL;
-    candidateImg.src = CANDIDATE_URL;
   </script>
 </body>
 </html>
