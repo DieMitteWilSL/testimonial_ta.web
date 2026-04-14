@@ -7,7 +7,6 @@
 ██╔══██║ ██║███████╗    ██║ ╚═╝ ██║██║   ██║      ██║   ███████╗    ╚███╔███╔╝██║███████╗
 ██████╔╝ ██║╚══════╝    ╚═╝     ╚═╝╚═╝   ╚═╝      ╚═╝   ╚══════╝     ╚══╝╚══╝ ╚═╝╚══════╝
 ╚═════╝  ╚═╝ -->
-<!doctype html>
 <html lang="de">
 <head>
   <meta charset="utf-8" />
@@ -260,10 +259,8 @@
 
     <div class="grid">
       <div class="card">
-        <h2>Inhalt erfassen</h2>
+        <h2>Banner gestalten</h2>
         <p class="intro">
-          Foto, Unterstützungstext sowie Name, Funktion und Firma oder Ort erfassen.
-          Der Hintergrund wird als fixes Template geladen, alles Weitere wird darüber gesetzt.
         </p>
 
         <div class="field">
@@ -306,9 +303,6 @@
         </div>
 
         <ul class="tips">
-          <li>Unterstützungstext: maximal 45 Zeichen inklusive Leerzeichen.</li>
-          <li>Name: maximal 30 Zeichen.</li>
-          <li>Funktion und Firma / Ort: maximal 30 Zeichen.</li>
           <li>Das Foto kann im roten Kreis mit Maus oder Finger verschoben werden.</li>
         </ul>
 
@@ -325,7 +319,7 @@
           <button id="shareBtn" disabled>📣 Jetzt teilen</button>
         </div>
 
-        <div class="footer-note">Format: 1080 × 1350 Pixel</div>
+        <div class="footer-note">Vielen Dank für die Unterstützung!</div>
       </div>
     </div>
   </div>
@@ -516,7 +510,7 @@
       ctx.fillStyle = '#111111';
 
       const boxW = 920;
-      const boxH = 176;
+      const boxH = 210;
       const boxX = CANVAS_W - boxW;
       const boxY = 642;
 
@@ -604,15 +598,16 @@
       ctx.textAlign = 'left';
       ctx.textBaseline = 'alphabetic';
 
-      const startY = 1120;
-      const lineHeight = 42;
+      const textStartX = SUPPORTER_CIRCLE.cx + SUPPORTER_CIRCLE.r + 58;
+      const startY = 1118;
+      const lineHeight = 56;
 
-      ctx.font = '700 34px Arial';
-      ctx.fillText(name, 301, startY);
+      ctx.font = '700 42px Arial';
+      ctx.fillText(name, textStartX, startY);
 
-      ctx.font = '400 28px Arial';
-      ctx.fillText(role, 301, startY + lineHeight);
-      ctx.fillText(org, 301, startY + lineHeight * 2);
+      ctx.font = '400 34px Arial';
+      ctx.fillText(role, textStartX, startY + lineHeight);
+      ctx.fillText(org, textStartX, startY + lineHeight * 2);
 
       ctx.restore();
     }
@@ -686,7 +681,7 @@
     btnDownload.addEventListener('click', () => {
       try {
         const a = document.createElement('a');
-        a.download = 'ThomasAbbt_Unterstuetzungsbanner.png';
+        a.download = 'ThomasAbbt_Banner.png';
         a.href = canvas.toDataURL('image/png');
         a.click();
         hideStatus();
