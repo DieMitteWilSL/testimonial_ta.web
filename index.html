@@ -15,7 +15,6 @@
   <title>Thomas Abbt – Unterstützungsbanner-Generator</title>
   <style>
     :root {
-      --yellow: #f5ad1b;
       --text: #111111;
       --muted: #5f6368;
       --panel: #ffffff;
@@ -25,6 +24,8 @@
       --danger-bg: #fff1f2;
       --danger-text: #991b1b;
       --danger-line: #fecdd3;
+      --brand-yellow: #f5ad1b;
+      --share-green: #25D366;
     }
 
     * { box-sizing: border-box; }
@@ -135,13 +136,7 @@
     input[type="range"] {
       width: 100%;
       cursor: pointer;
-      accent-color: #f5ad1b;
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      accent-color: var(--brand-yellow);
     }
 
     .button-row,
@@ -186,7 +181,7 @@
     }
 
     #shareBtn {
-      background: #25D366;
+      background: var(--share-green);
       border: none;
       color: #fff;
       font-size: 16px;
@@ -249,7 +244,6 @@
 
     @media (max-width: 920px) {
       .grid { grid-template-columns: 1fr; }
-      .row { grid-template-columns: 1fr; }
       body { padding: 18px 12px; }
     }
   </style>
@@ -268,8 +262,8 @@
       <div class="card">
         <h2>Inhalt erfassen</h2>
         <p class="intro">
-          Unten können Sie Ihr Foto, Ihren Namen, Ihre Funktion, Ihre Firma oder Ihren Ort sowie den individuellen Unterstützungstext erfassen.
-          Der weisse Textkasten im Banner passt sich der Textlänge automatisch an.
+          Foto, Unterstützungstext sowie Name, Funktion und Firma oder Ort erfassen.
+          Der Hintergrund wird als fixes Template geladen, alles Weitere wird darüber gesetzt.
         </p>
 
         <div class="field">
@@ -312,9 +306,9 @@
         </div>
 
         <ul class="tips">
-          <li>Unterstützungstext: maximal 45 Zeichen inklusive Leerzeichen, 20 px fett.</li>
-          <li>Name: maximal 30 Zeichen, 14 px fett.</li>
-          <li>Funktion und Firma / Ort: maximal 30 Zeichen, 12 px normal.</li>
+          <li>Unterstützungstext: maximal 45 Zeichen inklusive Leerzeichen.</li>
+          <li>Name: maximal 30 Zeichen.</li>
+          <li>Funktion und Firma / Ort: maximal 30 Zeichen.</li>
           <li>Das Foto kann im roten Kreis mit Maus oder Finger verschoben werden.</li>
         </ul>
 
@@ -340,30 +334,18 @@
     const CANVAS_W = 1080;
     const CANVAS_H = 1350;
 
+    // Datei lokal im gleichen Ordner wie die HTML-Datei ablegen
+    const BG_URL = 'Background_TA.png';
+
+    const CANDIDATE_URL = 'https://raw.githubusercontent.com/DieMitteWilSL/testimonial_ta2/refs/heads/main/ThomasAbbtWil.png';
+
+    const SUPPORTER_CIRCLE = { cx: 179, cy: 1143, r: 88 };
+    const SUPPORTER_BORDER = { width: 10, color: '#ff1b00' };
+
     const canvas = document.getElementById('c');
     const ctx = canvas.getContext('2d');
     canvas.width = CANVAS_W;
     canvas.height = CANVAS_H;
-
-    // Hintergrundbild (fixes Template)
-    const bgImg = new Image();
-    bgImg.crossOrigin = 'anonymous';
-    let bgLoaded = false;
-
-    bgImg.onload = () => {
-      bgLoaded = true;
-      hideStatus();
-      render();
-    };
-
-    bgImg.onerror = () => {
-      bgLoaded = false;
-      setStatus('Das Hintergrundbild konnte nicht geladen werden. Es wird ein gelber Platzhalter angezeigt.');
-      render();
-    };
-
-    const BG_URL = 'https://diemittewilsl.github.io/testimonial_ta.web/Background_TA.png';
-    bgImg.src = `${BG_URL}?v=${Date.now()}`;
 
     const inputPhoto = document.getElementById('photo');
     const inputQuote = document.getElementById('quote');
@@ -381,11 +363,11 @@
     const roleCount = document.getElementById('roleCount');
     const orgCount = document.getElementById('orgCount');
 
+    const bgImg = new Image();
     const candidateImg = new Image();
-    const SUPPORTER_CIRCLE = { cx: 179, cy: 1143, r: 88 };
-    const SUPPORTER_BORDER = { width: 10, color: '#ff1b00' };
     candidateImg.crossOrigin = 'anonymous';
 
+    let bgLoaded = false;
     let candidateLoaded = false;
     let userImg = null;
 
@@ -398,19 +380,278 @@
     let lastX = 0;
     let lastY = 0;
 
-    candidateImg.onload = () => {
-      candidateLoaded = true;
-      hideStatus();
-      render();
-    };
+    function updateCounters() {
+      quoteCount.textContent = inputQuote.value.length;
+      nameCount.textContent = inputName.value.length;
+      roleCount.textContent = inputRole.value.length;
+      orgCount.textContent = inputOrg.value.length;
+    }
 
-    candidateImg.onerror = () => {
-      candidateLoaded = false;
-      setStatus('Das Kandidatenbild konnte nicht geladen werden. Für den exakten Look empfiehlt sich ein freigestelltes PNG.');
-      render();
-    };
+    function setStatus(message) {
+      statusEl.style.display = 'block';
+      statusEl.textContent = message;
+    }
 
-    candidateImg.src = 'https://raw.githubusercontent.com/DieMitteWilSL/testimonial_ta2/refs/heads/main/ThomasAbbtWil.png';
+    function hideStatus() {
+      statusEl.style.display = 'none';
+      statusEl.textContent = '';
+    }
+
+    function clamp(v, min, max) {
+      return Math.min(max, Math.max(min, v));
+    }
+
+    function getCanvasPoint(e) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: (e.clientX - rect.left) * (canvas.width / rect.width),
+        y: (e.clientY - rect.top) * (canvas.height / rect.height)
+      };
+    }
+
+    function isInsideCircle(x, y, circle) {
+      const dx = x - circle.cx;
+      const dy = y - circle.cy;
+      return (dx * dx + dy * dy) <= (circle.r * circle.r);
+    }
+
+    function loadImageFromFile(file) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          resolve(img);
+        };
+
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error('Bild konnte nicht geladen werden'));
+        };
+
+        img.src = url;
+      });
+    }
+
+    function canvasToBlob(canvas, type = 'image/png', quality) {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error('Blob konnte nicht erstellt werden'));
+        }, type, quality);
+      });
+    }
+
+    function setupInitialTransform() {
+      zoom = 1;
+      zoomEl.value = '1';
+
+      const d = SUPPORTER_CIRCLE.r * 2;
+      const iw = userImg.naturalWidth;
+      const ih = userImg.naturalHeight;
+
+      baseScale = Math.max(d / iw, d / ih) * 1.06;
+      offsetX = 0;
+      offsetY = 0;
+
+      clampOffsets();
+    }
+
+    function clampOffsets() {
+      if (!userImg) return;
+
+      const d = SUPPORTER_CIRCLE.r * 2;
+      const scale = baseScale * zoom;
+      const w = userImg.naturalWidth * scale;
+      const h = userImg.naturalHeight * scale;
+
+      const maxX = Math.max(0, (w - d) / 2);
+      const maxY = Math.max(0, (h - d) / 2);
+
+      offsetX = clamp(offsetX, -maxX, maxX);
+      offsetY = clamp(offsetY, -maxY, maxY);
+    }
+
+    function wrapTextByWidth(ctx, text, maxWidth) {
+      const words = text.split(/\s+/).filter(Boolean);
+      if (!words.length) return [''];
+
+      const lines = [];
+      let current = words[0];
+
+      for (let i = 1; i < words.length; i++) {
+        const test = current + ' ' + words[i];
+        if (ctx.measureText(test).width <= maxWidth) {
+          current = test;
+        } else {
+          lines.push(current);
+          current = words[i];
+        }
+      }
+
+      lines.push(current);
+      return lines.slice(0, 3);
+    }
+
+    function roundRectCustom(ctx, x, y, w, h, rtl, rtr, rbr, rbl, fill) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(x + rtl, y);
+      ctx.lineTo(x + w - rtr, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + rtr);
+      ctx.lineTo(x + w, y + h - rbr);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - rbr, y + h);
+      ctx.lineTo(x + rbl, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - rbl);
+      ctx.lineTo(x, y + rtl);
+      ctx.quadraticCurveTo(x, y, x + rtl, y);
+      ctx.closePath();
+      ctx.fillStyle = fill;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawCandidate() {
+      if (!candidateLoaded) return;
+
+      // Nur das kleine Portrait im Hintergrund abdecken
+      ctx.save();
+      ctx.fillStyle = '#f2b12c';
+      ctx.fillRect(735, 148, 128, 118);
+      ctx.restore();
+
+      const maxW = 355;
+      const maxH = 505;
+      const ratio = Math.min(maxW / candidateImg.naturalWidth, maxH / candidateImg.naturalHeight);
+
+      const w = candidateImg.naturalWidth * ratio;
+      const h = candidateImg.naturalHeight * ratio;
+      const x = 666;
+      const y = 134;
+
+      ctx.save();
+      ctx.shadowColor = 'rgba(255,255,255,1)';
+      ctx.shadowBlur = 7;
+      ctx.drawImage(candidateImg, x, y, w, h);
+      ctx.restore();
+
+      ctx.drawImage(candidateImg, x, y, w, h);
+    }
+
+    function drawQuoteText() {
+      const rawText = (inputQuote.value || 'Weil er pragmatisch und proaktiv ist!').trim();
+      const text = rawText || 'Weil er pragmatisch und proaktiv ist!';
+
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = 'italic 700 32px Arial';
+      ctx.fillStyle = '#111111';
+
+      const lines = wrapTextByWidth(ctx, text, 620);
+      const maxLineWidth = Math.max(...lines.map(line => ctx.measureText(line).width), 0);
+
+      const paddingX = 42;
+      const paddingY = 26;
+      const boxW = Math.max(620, Math.min(860, maxLineWidth + paddingX * 2));
+      const boxH = Math.max(118, lines.length * 42 + paddingY * 2);
+
+      // Rechts bündig wie im Referenzbild
+      const boxX = CANVAS_W - boxW;
+      const boxY = 642;
+
+      roundRectCustom(ctx, boxX, boxY, boxW, boxH, 36, 0, 0, 36, '#ffffff');
+
+      const totalHeight = lines.length * 42;
+      const startY = boxY + boxH / 2 - totalHeight / 2 + 21;
+
+      lines.forEach((line, i) => {
+        ctx.fillText(line, boxX + boxW / 2, startY + i * 42);
+      });
+
+      ctx.restore();
+    }
+
+    function drawCircularUserImage() {
+      const C = SUPPORTER_CIRCLE;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(C.cx, C.cy, C.r, 0, Math.PI * 2);
+      ctx.clip();
+
+      const scale = baseScale * zoom;
+      const w = userImg.naturalWidth * scale;
+      const h = userImg.naturalHeight * scale;
+      const x = (C.cx - w / 2) + offsetX;
+      const y = (C.cy - h / 2) + offsetY;
+
+      ctx.drawImage(userImg, x, y, w, h);
+      ctx.restore();
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(C.cx, C.cy, C.r + SUPPORTER_BORDER.width / 2, 0, Math.PI * 2);
+      ctx.lineWidth = SUPPORTER_BORDER.width;
+      ctx.strokeStyle = SUPPORTER_BORDER.color;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawSupporter() {
+      if (userImg) {
+        drawCircularUserImage();
+      } else {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(SUPPORTER_CIRCLE.cx, SUPPORTER_CIRCLE.cy, SUPPORTER_CIRCLE.r, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff7eb';
+        ctx.fill();
+        ctx.lineWidth = SUPPORTER_BORDER.width;
+        ctx.strokeStyle = SUPPORTER_BORDER.color;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      const name = (inputName.value || 'Felix Mustermann').trim() || 'Felix Mustermann';
+      const role = (inputRole.value || 'Geschäftsführer').trim() || 'Geschäftsführer';
+      const org = (inputOrg.value || 'Firma Maximusmann, Wil').trim() || 'Firma Maximusmann, Wil';
+
+      ctx.save();
+      ctx.fillStyle = '#111111';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+
+      ctx.font = '700 24px Arial';
+      ctx.fillText(name, 301, 1118);
+
+      ctx.font = '400 18px Arial';
+      ctx.fillText(role, 301, 1147);
+      ctx.fillText(org, 301, 1174);
+
+      ctx.restore();
+    }
+
+    function render() {
+      try {
+        ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+
+        if (bgLoaded && bgImg.complete && bgImg.naturalWidth > 0) {
+          ctx.drawImage(bgImg, 0, 0, CANVAS_W, CANVAS_H);
+        } else {
+          ctx.fillStyle = '#f5ad1b';
+          ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+        }
+
+        drawCandidate();
+        drawQuoteText();
+        drawSupporter();
+      } catch (err) {
+        console.error(err);
+        setStatus('Fehler beim Zeichnen: ' + err.message);
+      }
+    }
 
     inputPhoto.addEventListener('change', async () => {
       const file = inputPhoto.files && inputPhoto.files[0];
@@ -419,10 +660,12 @@
       try {
         userImg = await loadImageFromFile(file);
         setupInitialTransform();
+
         zoomEl.disabled = false;
         btnReset.disabled = false;
         btnDownload.disabled = false;
         btnShare.disabled = false;
+
         hideStatus();
         render();
       } catch (err) {
@@ -434,15 +677,19 @@
       el.addEventListener('input', () => {
         updateCounters();
         render();
-          });
+      });
+    });
 
     zoomEl.addEventListener('input', () => {
       if (!userImg) return;
+
       const prevZoom = zoom;
       zoom = parseFloat(zoomEl.value);
+
       const factor = zoom / prevZoom;
       offsetX *= factor;
       offsetY *= factor;
+
       clampOffsets();
       render();
     });
@@ -475,7 +722,11 @@
         const blob = await canvasToBlob(canvas, 'image/png');
         const file = new File([blob], 'ThomasAbbt_Unterstuetzungsbanner.png', { type: 'image/png' });
 
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        if (
+          navigator.share &&
+          navigator.canShare &&
+          navigator.canShare({ files: [file] })
+        ) {
           await navigator.share({
             files: [file],
             title: 'Unterstützungsbanner',
@@ -493,8 +744,10 @@
 
     canvas.addEventListener('pointerdown', (e) => {
       if (!userImg) return;
+
       const p = getCanvasPoint(e);
       if (!isInsideCircle(p.x, p.y, SUPPORTER_CIRCLE)) return;
+
       dragging = true;
       lastX = p.x;
       lastY = p.y;
@@ -503,13 +756,17 @@
 
     canvas.addEventListener('pointermove', (e) => {
       if (!dragging || !userImg) return;
+
       const p = getCanvasPoint(e);
       const dx = p.x - lastX;
       const dy = p.y - lastY;
+
       offsetX += dx;
       offsetY += dy;
+
       lastX = p.x;
       lastY = p.y;
+
       clampOffsets();
       render();
     });
@@ -523,287 +780,33 @@
       dragging = false;
     });
 
-    function updateCounters() {
-      quoteCount.textContent = inputQuote.value.length;
-      nameCount.textContent = inputName.value.length;
-      roleCount.textContent = inputRole.value.length;
-      orgCount.textContent = inputOrg.value.length;
-    }
+    bgImg.onload = () => {
+      bgLoaded = true;
+      hideStatus();
+      render();
+    };
 
-    function setupInitialTransform() {
-      zoom = 1;
-      zoomEl.value = '1';
-      const d = SUPPORTER_CIRCLE.r * 2;
-      const iw = userImg.naturalWidth;
-      const ih = userImg.naturalHeight;
-      baseScale = Math.max(d / iw, d / ih) * 1.06;
-      offsetX = 0;
-      offsetY = 0;
-      clampOffsets();
-    }
+    bgImg.onerror = () => {
+      bgLoaded = false;
+      setStatus('Background_TA.png konnte nicht geladen werden. Bitte prüfen, ob die Datei im gleichen Ordner liegt.');
+      render();
+    };
 
-    function clampOffsets() {
-      if (!userImg) return;
-      const d = SUPPORTER_CIRCLE.r * 2;
-      const scale = baseScale * zoom;
-      const w = userImg.naturalWidth * scale;
-      const h = userImg.naturalHeight * scale;
-      const maxX = Math.max(0, (w - d) / 2);
-      const maxY = Math.max(0, (h - d) / 2);
-      offsetX = clamp(offsetX, -maxX, maxX);
-      offsetY = clamp(offsetY, -maxY, maxY);
-    }
+    candidateImg.onload = () => {
+      candidateLoaded = true;
+      hideStatus();
+      render();
+    };
 
-    function render() {
-      ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
-
-      // Hintergrund zeichnen
-      if (bgLoaded && bgImg.complete && bgImg.naturalWidth > 0) {
-        ctx.drawImage(bgImg, 0, 0, CANVAS_W, CANVAS_H);
-      } else {
-        ctx.fillStyle = '#f5ad1b';
-        ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
-
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '700 28px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('Hintergrundbild wird geladen oder konnte nicht geladen werden', CANVAS_W / 2, CANVAS_H / 2);
-      }
-
-      // Kandidat
-      drawCandidate();
-
-      // Unterstützungstext (nur Text, Box ist im Hintergrundbild)
-      drawQuoteText();
-
-      // Unterstützer
-      drawSupporter();
-    }
-
-    
-
-    
-
-    function drawCandidate() {
-      if (!candidateLoaded) return;
-
-      const maxW = 420;
-      const maxH = 560;
-      const ratio = Math.min(maxW / candidateImg.naturalWidth, maxH / candidateImg.naturalHeight);
-      const w = candidateImg.naturalWidth * ratio;
-      const h = candidateImg.naturalHeight * ratio;
-
-      const x = 640;
-      const y = 110;
-
-      // HARTE weisse Outline wie im Beispiel
-      ctx.save();
-      ctx.lineJoin = 'round';
-      ctx.lineWidth = 18;
-      ctx.strokeStyle = '#ffffff';
-
-      ctx.beginPath();
-      ctx.rect(x, y, w, h);
-      ctx.stroke();
-      ctx.restore();
-
-      // Bild leicht überlappend über Quote-Box zeichnen
-      ctx.save();
-      ctx.drawImage(candidateImg, x, y, w, h);
-      ctx.restore();
-    }
-
-    function drawQuoteText() {
-      const rawText = (inputQuote.value || 'Weil er pragmatisch und proaktiv ist!').trim();
-      const text = rawText || 'Weil er pragmatisch und proaktiv ist!';
-
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.font = '700 italic 32px Arial';
-      ctx.fillStyle = '#111';
-
-      const lines = wrapTextByWidth(ctx, text, 640);
-      const lineHeight = 42;
-
-      const centerX = CANVAS_W / 2;
-      const centerY = 800; // Position im bestehenden weissen Feld
-
-      const totalHeight = lines.length * lineHeight;
-      const startY = centerY - totalHeight / 2 + lineHeight / 2;
-
-      lines.forEach((line, i) => {
-        ctx.fillText(line, centerX, startY + i * lineHeight);
-      });
-    });
-    }
-
-    function drawSupporter() {
-      if (userImg) {
-        drawCircularUserImage();
-      } else {
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(SUPPORTER_CIRCLE.cx, SUPPORTER_CIRCLE.cy, SUPPORTER_CIRCLE.r, 0, Math.PI * 2);
-        ctx.fillStyle = '#fff7eb';
-        ctx.fill();
-        ctx.lineWidth = SUPPORTER_BORDER.width;
-        ctx.strokeStyle = SUPPORTER_BORDER.color;
-        ctx.stroke();
-        ctx.restore();
-      }
-
-      const name = (inputName.value || 'Felix Mustermann').trim() || 'Felix Mustermann';
-      const role = (inputRole.value || 'Geschäftsführer').trim() || 'Geschäftsführer';
-      const org = (inputOrg.value || 'Firma Maximusmann, Wil').trim() || 'Firma Maximusmann, Wil';
-
-      const textX = 338;
-      const baseY = 1133;
-
-      ctx.fillStyle = '#111';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'alphabetic';
-
-      ctx.font = '700 22px Arial';
-      ctx.fillText(name, textX, baseY);
-
-      ctx.font = '400 18px Arial';
-      ctx.fillText(role, textX, baseY + 24);
-      ctx.fillText(org, textX, baseY + 48);
-    }
-
-    function drawCircularUserImage() {
-      const C = SUPPORTER_CIRCLE;
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(C.cx, C.cy, C.r, 0, Math.PI * 2);
-      ctx.clip();
-
-      const scale = baseScale * zoom;
-      const w = userImg.naturalWidth * scale;
-      const h = userImg.naturalHeight * scale;
-      const x = (C.cx - w / 2) + offsetX;
-      const y = (C.cy - h / 2) + offsetY;
-      ctx.drawImage(userImg, x, y, w, h);
-      ctx.restore();
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(C.cx, C.cy, C.r + SUPPORTER_BORDER.width / 2, 0, Math.PI * 2);
-      ctx.lineWidth = SUPPORTER_BORDER.width;
-      ctx.strokeStyle = SUPPORTER_BORDER.color;
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    
-
-    function wrapTextByWidth(ctx, text, maxWidth) {
-      const words = text.split(/\s+/).filter(Boolean);
-      if (!words.length) return [''];
-
-      const lines = [];
-      let current = words[0];
-
-      for (let i = 1; i < words.length; i++) {
-        const test = current + ' ' + words[i];
-        if (ctx.measureText(test).width <= maxWidth) {
-          current = test;
-        } else {
-          lines.push(current);
-          current = words[i];
-        }
-      }
-
-      lines.push(current);
-      return lines.slice(0, 3);
-    }
-
-    function roundRectUniform(ctx, x, y, w, h, r, fill) {
-      roundRect(ctx, x, y, w, h, r, r, r, r, fill);
-    }
-
-    function roundRect(ctx, x, y, w, h, rtl, rtr, rbr, rbl, fill) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(x + rtl, y);
-      ctx.lineTo(x + w - rtr, y);
-      ctx.quadraticCurveTo(x + w, y, x + w, y + rtr);
-      ctx.lineTo(x + w, y + h - rbr);
-      ctx.quadraticCurveTo(x + w, y + h, x + w - rbr, y + h);
-      ctx.lineTo(x + rbl, y + h);
-      ctx.quadraticCurveTo(x, y + h, x, y + h - rbl);
-      ctx.lineTo(x, y + rtl);
-      ctx.quadraticCurveTo(x, y, x + rtl, y);
-      ctx.closePath();
-      ctx.fillStyle = fill;
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function clamp(v, min, max) {
-      return Math.min(max, Math.max(min, v));
-    }
-
-    function getCanvasPoint(e) {
-      const rect = canvas.getBoundingClientRect();
-      return {
-        x: (e.clientX - rect.left) * (canvas.width / rect.width),
-        y: (e.clientY - rect.top) * (canvas.height / rect.height)
-      };
-    }
-
-    function isInsideCircle(x, y, circle) {
-      const dx = x - circle.cx;
-      const dy = y - circle.cy;
-      return (dx * dx + dy * dy) <= (circle.r * circle.r);
-    }
-
-    function loadImageFromFile(file) {
-      return new Promise((resolve, reject) => {
-        const url = URL.createObjectURL(file);
-        const img = new Image();
-        img.onload = () => {
-          URL.revokeObjectURL(url);
-          resolve(img);
-        };
-        img.onerror = () => {
-          URL.revokeObjectURL(url);
-          reject(new Error('Bild konnte nicht geladen werden'));
-        };
-        img.src = url;
-      });
-    }
-
-    function canvasToBlob(canvas, type = 'image/png', quality) {
-      return new Promise((resolve, reject) => {
-        canvas.toBlob((blob) => {
-          if (blob) resolve(blob);
-          else reject(new Error('Blob konnte nicht erstellt werden'));
-        }, type, quality);
-      });
-    }
-
-    function setStatus(message) {
-      statusEl.style.display = 'block';
-      statusEl.textContent = message;
-    }
-
-    function hideStatus() {
-      statusEl.style.display = 'none';
-      statusEl.textContent = '';
-    }
+    candidateImg.onerror = () => {
+      candidateLoaded = false;
+      setStatus('Das Kandidatenbild konnte nicht geladen werden.');
+      render();
+    };
 
     updateCounters();
-
-    window.addEventListener('load', () => {
-      render();
-      if (!bgImg.complete || bgImg.naturalWidth === 0) {
-        bgImg.src = `${BG_URL}?retry=${Date.now()}`;
-      }
-    });
-
-    render();
+    bgImg.src = BG_URL;
+    candidateImg.src = CANDIDATE_URL;
   </script>
 </body>
 </html>
