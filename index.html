@@ -340,27 +340,30 @@
     const CANVAS_W = 1080;
     const CANVAS_H = 1350;
 
-    const COLORS = {
-      yellow: '#f5ad1b',
-      white: '#ffffff',
-      black: '#111111',
-      red: '#ff1b00'
-    };
-
-    const CANDIDATE = {
-      name: 'Thomas Abbt',
-      subtitle: 'zur Wahl in den Wiler Stadtrat',
-      website: 'thomasabbt.ch',
-      portrait: 'https://raw.githubusercontent.com/DieMitteWilSL/testimonial_ta2/refs/heads/main/ThomasAbbtWil.png'
-    }; // Bei Bedarf hier das freigestellte PNG von Thomas Abbt einsetzen
-
-    const SUPPORTER_CIRCLE = { cx: 214, cy: 1166, r: 96 };
-    const SUPPORTER_BORDER = { width: 12, color: COLORS.red };
-
     const canvas = document.getElementById('c');
     const ctx = canvas.getContext('2d');
     canvas.width = CANVAS_W;
     canvas.height = CANVAS_H;
+
+    // Hintergrundbild (fixes Template)
+    const bgImg = new Image();
+    bgImg.crossOrigin = 'anonymous';
+    let bgLoaded = false;
+
+    bgImg.onload = () => {
+      bgLoaded = true;
+      hideStatus();
+      render();
+    };
+
+    bgImg.onerror = () => {
+      bgLoaded = false;
+      setStatus('Das Hintergrundbild konnte nicht geladen werden. Es wird ein gelber Platzhalter angezeigt.');
+      render();
+    };
+
+    const BG_URL = 'https://diemittewilsl.github.io/testimonial_ta.web/Background_TA.png';
+    bgImg.src = `${BG_URL}?v=${Date.now()}`;
 
     const inputPhoto = document.getElementById('photo');
     const inputQuote = document.getElementById('quote');
@@ -379,6 +382,8 @@
     const orgCount = document.getElementById('orgCount');
 
     const candidateImg = new Image();
+    const SUPPORTER_CIRCLE = { cx: 179, cy: 1143, r: 88 };
+    const SUPPORTER_BORDER = { width: 10, color: '#ff1b00' };
     candidateImg.crossOrigin = 'anonymous';
 
     let candidateLoaded = false;
@@ -405,7 +410,7 @@
       render();
     };
 
-    candidateImg.src = CANDIDATE.portrait;
+    candidateImg.src = 'https://raw.githubusercontent.com/DieMitteWilSL/testimonial_ta2/refs/heads/main/ThomasAbbtWil.png';
 
     inputPhoto.addEventListener('change', async () => {
       const file = inputPhoto.files && inputPhoto.files[0];
@@ -429,8 +434,7 @@
       el.addEventListener('input', () => {
         updateCounters();
         render();
-      });
-    });
+          });
 
     zoomEl.addEventListener('input', () => {
       if (!userImg) return;
@@ -552,35 +556,34 @@
 
     function render() {
       ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
-      drawBackground();
-      drawTopBox();
+
+      // Hintergrund zeichnen
+      if (bgLoaded && bgImg.complete && bgImg.naturalWidth > 0) {
+        ctx.drawImage(bgImg, 0, 0, CANVAS_W, CANVAS_H);
+      } else {
+        ctx.fillStyle = '#f5ad1b';
+        ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '700 28px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Hintergrundbild wird geladen oder konnte nicht geladen werden', CANVAS_W / 2, CANVAS_H / 2);
+      }
+
+      // Kandidat
       drawCandidate();
-      drawQuoteBox();
+
+      // Unterstützungstext (nur Text, Box ist im Hintergrundbild)
+      drawQuoteText();
+
+      // Unterstützer
       drawSupporter();
-      drawWebsite();
     }
 
-    function drawBackground() {
-      ctx.fillStyle = COLORS.yellow;
-      ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
-    }
+    
 
-    function drawTopBox() {
-      roundRect(ctx, 0, 97, 620, 275, 0, 32, 32, 0, COLORS.white);
-
-      ctx.fillStyle = COLORS.black;
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'alphabetic';
-
-      ctx.font = '400 56px Arial';
-      ctx.fillText('Ich unterstütze', 42, 176);
-
-      ctx.font = '700 86px Arial';
-      ctx.fillText(CANDIDATE.name, 42, 255);
-
-      ctx.font = '400 43px Arial';
-      ctx.fillText(CANDIDATE.subtitle, 42, 318);
-    }
+    
 
     function drawCandidate() {
       if (!candidateLoaded) return;
@@ -611,35 +614,28 @@
       ctx.restore();
     }
 
-    function drawQuoteBox() {
+    function drawQuoteText() {
       const rawText = (inputQuote.value || 'Weil er pragmatisch und proaktiv ist!').trim();
       const text = rawText || 'Weil er pragmatisch und proaktiv ist!';
 
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.font = '700 italic 32px Arial';
+      ctx.fillStyle = '#111';
 
-      const lines = wrapTextByWidth(ctx, text, 620);
+      const lines = wrapTextByWidth(ctx, text, 640);
       const lineHeight = 42;
-      const paddingLeft = 34;
-      const paddingRight = 34;
-      const paddingY = 22;
-      const maxLineWidth = Math.max(...lines.map(line => ctx.measureText(line).width), 0);
-      const minX = 92;
-      const boxW = Math.min(1080 - minX, Math.max(560, maxLineWidth + paddingLeft + paddingRight));
-      const boxH = Math.max(108, lines.length * lineHeight + paddingY * 2);
-      const boxX = CANVAS_W - boxW;
-      const boxY = 720;
 
-      roundRect(ctx, boxX, boxY, boxW, boxH, 34, 0, 0, 34, COLORS.white);
+      const centerX = CANVAS_W / 2;
+      const centerY = 800; // Position im bestehenden weissen Feld
 
-      ctx.fillStyle = COLORS.black;
       const totalHeight = lines.length * lineHeight;
-      const startY = boxY + boxH / 2 - totalHeight / 2 + lineHeight / 2;
-      const centerX = boxX + boxW / 2;
-      lines.forEach((line, index) => {
-        ctx.fillText(line, centerX, startY + index * lineHeight);
+      const startY = centerY - totalHeight / 2 + lineHeight / 2;
+
+      lines.forEach((line, i) => {
+        ctx.fillText(line, centerX, startY + i * lineHeight);
       });
+    });
     }
 
     function drawSupporter() {
@@ -664,7 +660,7 @@
       const textX = 338;
       const baseY = 1133;
 
-      ctx.fillStyle = COLORS.black;
+      ctx.fillStyle = '#111';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'alphabetic';
 
@@ -700,12 +696,7 @@
       ctx.restore();
     }
 
-    function drawWebsite() {
-      ctx.font = '700 28px Arial';
-      ctx.fillStyle = COLORS.white;
-      ctx.textAlign = 'left';
-      ctx.fillText(CANDIDATE.website, 48, 1310);
-    }
+    
 
     function wrapTextByWidth(ctx, text, maxWidth) {
       const words = text.split(/\s+/).filter(Boolean);
@@ -804,6 +795,14 @@
     }
 
     updateCounters();
+
+    window.addEventListener('load', () => {
+      render();
+      if (!bgImg.complete || bgImg.naturalWidth === 0) {
+        bgImg.src = `${BG_URL}?retry=${Date.now()}`;
+      }
+    });
+
     render();
   </script>
 </body>
