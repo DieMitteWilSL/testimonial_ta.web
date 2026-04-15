@@ -506,7 +506,7 @@
       const text = rawText || 'Weil er pragmatisch und proaktiv ist!';
 
       ctx.save();
-      ctx.textAlign = 'center';
+      ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = '#111111';
 
@@ -543,7 +543,7 @@
       const startY = boxY + paddingY + (innerHeight - totalHeight) / 2 + lineHeight / 2 + 2;
 
       lines.forEach((line, i) => {
-        ctx.fillText(line, boxX + boxW / 2, startY + i * lineHeight);
+        ctx.fillText(line, boxX + paddingX, startY + i * lineHeight);
       });
 
       ctx.restore();
