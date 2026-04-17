@@ -1,17 +1,9 @@
 <!doctype html>
-<!-- 
-██████╗  ██╗███████╗    ███╗   ███╗██╗████████╗████████╗███████╗    ██╗    ██╗██╗██╗
-██╔══██╗ ██║██╔════╝    ████╗ ████║██║╚══██╔══╝╚══██╔══╝██╔════╝    ██║    ██║██║██║
-██║  ██║ ██║█████╗      ██╔████╔██║██║   ██║      ██║   █████╗      ██║ █╗ ██║██║██║
-██║  ██║ ██║██╔══╝      ██║╚██╔╝██║██║   ██║      ██║   ██╔══╝      ██║███╗██║██║██║
-██╔══██║ ██║███████╗    ██║ ╚═╝ ██║██║   ██║      ██║   ███████╗    ╚███╔███╔╝██║███████╗
-██████╔╝ ██║╚══════╝    ╚═╝     ╚═╝╚═╝   ╚═╝      ╚═╝   ╚══════╝     ╚══╝╚══╝ ╚═╝╚══════╝
-╚═════╝  ╚═╝ -->
 <html lang="de">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Thomas Abbt – in den Wiler Stadtrat</title>
+  <title>Thomas Abbt – Testimonial Banner</title>
   <style>
     :root {
       --text: #111111;
@@ -24,7 +16,7 @@
       --danger-text: #991b1b;
       --danger-line: #fecdd3;
       --brand-yellow: #f5ad1b;
-      --share-green: #25D366;
+      --blue: #004289;
     }
 
     * { box-sizing: border-box; }
@@ -42,30 +34,6 @@
       margin: 0 auto;
       display: grid;
       gap: 18px;
-    }
-
-    .hero {
-      background: linear-gradient(135deg, #f5ad1b 0%, #f3b63a 100%);
-      color: #fff;
-      border-radius: 24px;
-      padding: 24px;
-      box-shadow: var(--shadow);
-      display: none;
-    }
-
-    .hero h1 {
-      margin: 0 0 8px;
-      font-size: clamp(28px, 4vw, 38px);
-      line-height: 1.05;
-      font-weight: 800;
-    }
-
-    .hero p {
-      margin: 0;
-      max-width: 860px;
-      font-size: 16px;
-      line-height: 1.55;
-      color: rgba(255,255,255,.96);
     }
 
     .grid {
@@ -129,7 +97,7 @@
     }
 
     textarea {
-      min-height: 92px;
+      min-height: 110px;
       resize: vertical;
     }
 
@@ -181,7 +149,7 @@
     }
 
     #shareBtn {
-      background: var(--share-green);
+      background: #25D366;
       border: none;
       color: #fff;
       font-size: 16px;
@@ -250,48 +218,35 @@
 </head>
 <body>
   <div class="wrap">
-    <section class="hero">
-      <h1>Unterstützungsbanner für Thomas Abbt</h1>
-      <p>
-        Foto hochladen, Text ergänzen und das fertige Banner direkt als PNG exportieren.
-        Das Format ist auf 1080 × 1350 Pixel ausgelegt.
-      </p>
-    </section>
-
     <div class="grid">
       <div class="card">
         <h2>Banner gestalten</h2>
         <p class="intro">
+          Foto hochladen, Zitat erfassen und Banner direkt als PNG exportieren.
         </p>
 
         <div class="field">
-          <label for="photo">Foto hochladen</label>
+          <label for="photo">Foto Unterstützer/in</label>
           <input id="photo" type="file" accept="image/*" />
-          <div class="hint">Empfohlen: quadratisches oder hochauflösendes Portraitfoto.</div>
+          <div class="hint">Das Foto erscheint unten links im runden Kreis und kann mit Maus oder Finger verschoben werden.</div>
         </div>
 
         <div class="field">
-          <label for="quote">Unterstützungstext</label>
-          <textarea id="quote" maxlength="75" placeholder="Weil er pragmatisch und proaktiv ist!"></textarea>
-          <div class="counter"><span id="quoteCount">0</span>/75 Zeichen</div>
+          <label for="quote">Zitat</label>
+          <textarea id="quote" maxlength="150" placeholder="Thomas ist ein Macher, der ganz genau weiss, wo im Gewerbe und auch bei den Familien der Schuh drückt!"></textarea>
+          <div class="counter"><span id="quoteCount">0</span>/150 Zeichen</div>
         </div>
 
         <div class="field">
           <label for="supporterName">Name</label>
-          <input id="supporterName" type="text" maxlength="30" placeholder="Felix Mustermann" />
-          <div class="counter"><span id="nameCount">0</span>/30 Zeichen</div>
+          <input id="supporterName" type="text" maxlength="40" placeholder="Vorname Nachname" />
+          <div class="counter"><span id="nameCount">0</span>/40 Zeichen</div>
         </div>
 
         <div class="field">
           <label for="supporterRole">Funktion</label>
-          <input id="supporterRole" type="text" maxlength="30" placeholder="Geschäftsführer" />
-          <div class="counter"><span id="roleCount">0</span>/30 Zeichen</div>
-        </div>
-
-        <div class="field">
-          <label for="supporterOrg">Firma / Ort</label>
-          <input id="supporterOrg" type="text" maxlength="30" placeholder="Firma Maximusmann, Wil" />
-          <div class="counter"><span id="orgCount">0</span>/30 Zeichen</div>
+          <input id="supporterRole" type="text" maxlength="40" placeholder="Funktion/Ergänzend" />
+          <div class="counter"><span id="roleCount">0</span>/40 Zeichen</div>
         </div>
 
         <div class="field">
@@ -300,11 +255,11 @@
         </div>
 
         <div class="button-row">
-          <button id="reset" disabled>Zurücksetzen</button>
+          <button id="reset" disabled>Foto zurücksetzen</button>
         </div>
 
         <ul class="tips">
-          <li>Das Foto kann im roten Kreis mit Maus oder Finger verschoben werden.</li>
+          
         </ul>
 
         <div id="status" class="status"></div>
@@ -316,8 +271,8 @@
         </div>
 
         <div class="download-wrap">
-          <button id="download" disabled>⬇ Banner als PNG herunterladen</button>
-          <button id="shareBtn" disabled>📣 Jetzt teilen</button>
+          <button id="download">⬇ Banner als PNG herunterladen</button>
+          <button id="shareBtn">📣 Jetzt teilen</button>
         </div>
 
         <div class="footer-note">Vielen Dank für die Unterstützung!</div>
@@ -328,10 +283,18 @@
   <script>
     const CANVAS_W = 1080;
     const CANVAS_H = 1350;
-    const BG_URL = 'https://diemittewilsl.github.io/testimonial_ta.web/Background_TA.png';
 
-    const SUPPORTER_CIRCLE = { cx: 179, cy: 1143, r: 110 };
-    const SUPPORTER_BORDER = { width: 10, color: '#ff1b00' };
+    const BG_URL = 'https://diemittewilsl.github.io/testimonial_ta.web/Thomas%20Abbt_Quote_1080x1350.png';
+
+    const SUPPORTER_CIRCLE = { cx: 181, cy: 1145, r: 108 };
+    const SUPPORTER_BORDER = { width: 8, color: '#f3f4f6' };
+
+    const QUOTE_BOX = {
+      x: 32,
+      y: 420,
+      w: 600,
+      h: 420
+    };
 
     const canvas = document.getElementById('c');
     const ctx = canvas.getContext('2d');
@@ -342,7 +305,6 @@
     const inputQuote = document.getElementById('quote');
     const inputName = document.getElementById('supporterName');
     const inputRole = document.getElementById('supporterRole');
-    const inputOrg = document.getElementById('supporterOrg');
     const zoomEl = document.getElementById('zoom');
     const btnReset = document.getElementById('reset');
     const btnDownload = document.getElementById('download');
@@ -352,7 +314,6 @@
     const quoteCount = document.getElementById('quoteCount');
     const nameCount = document.getElementById('nameCount');
     const roleCount = document.getElementById('roleCount');
-    const orgCount = document.getElementById('orgCount');
 
     const bgImg = new Image();
     bgImg.crossOrigin = 'anonymous';
@@ -373,7 +334,6 @@
       quoteCount.textContent = inputQuote.value.length;
       nameCount.textContent = inputName.value.length;
       roleCount.textContent = inputRole.value.length;
-      orgCount.textContent = inputOrg.value.length;
     }
 
     function setStatus(message) {
@@ -440,7 +400,7 @@
       const iw = userImg.naturalWidth;
       const ih = userImg.naturalHeight;
 
-      baseScale = Math.max(d / iw, d / ih) * 1.06;
+      baseScale = Math.max(d / iw, d / ih) * 1.08;
       offsetX = 0;
       offsetY = 0;
 
@@ -462,7 +422,7 @@
       offsetY = clamp(offsetY, -maxY, maxY);
     }
 
-    function wrapTextByWidth(ctx, text, maxWidth) {
+    function wrapTextByWidth(context, text, maxWidth) {
       const words = text.split(/\s+/).filter(Boolean);
       if (!words.length) return [''];
 
@@ -471,7 +431,7 @@
 
       for (let i = 1; i < words.length; i++) {
         const test = current + ' ' + words[i];
-        if (ctx.measureText(test).width <= maxWidth) {
+        if (context.measureText(test).width <= maxWidth) {
           current = test;
         } else {
           lines.push(current);
@@ -480,70 +440,56 @@
       }
 
       lines.push(current);
-      return lines.slice(0, 3);
+      return lines;
     }
 
-    function roundRectCustom(ctx, x, y, w, h, rtl, rtr, rbr, rbl, fill) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(x + rtl, y);
-      ctx.lineTo(x + w - rtr, y);
-      ctx.quadraticCurveTo(x + w, y, x + w, y + rtr);
-      ctx.lineTo(x + w, y + h - rbr);
-      ctx.quadraticCurveTo(x + w, y + h, x + w - rbr, y + h);
-      ctx.lineTo(x + rbl, y + h);
-      ctx.quadraticCurveTo(x, y + h, x, y + h - rbl);
-      ctx.lineTo(x, y + rtl);
-      ctx.quadraticCurveTo(x, y, x + rtl, y);
-      ctx.closePath();
-      ctx.fillStyle = fill;
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function drawQuoteText() {
-      const rawText = (inputQuote.value || 'Weil er pragmatisch und proaktiv ist!').trim();
-      const text = rawText || 'Weil er pragmatisch und proaktiv ist!';
-
-      ctx.save();
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#111111';
-
-      const boxW = 920;
-      const boxH = 210;
-      const boxX = CANVAS_W - boxW;
-      const boxY = 642;
-
-      roundRectCustom(ctx, boxX, boxY, boxW, boxH, 36, 0, 0, 36, '#ffffff');
-
-      const paddingX = 80;
-      const paddingY = 34;
-      const maxTextWidth = boxW - paddingX * 2;
-
-      let fontSize = 68;
-      const minFontSize = 40;
+    function fitQuoteText(text, maxWidth, maxHeight) {
+      let fontSize = 60;
+      const minFontSize = 28;
       let lines = [];
 
       while (fontSize >= minFontSize) {
-        ctx.font = `italic 700 ${fontSize}px Arial`;
-        lines = wrapTextByWidth(ctx, text, maxTextWidth);
+        ctx.font = `700 ${fontSize}px Arial`;
+        lines = wrapTextByWidth(ctx, text, maxWidth);
 
-        const widest = Math.max(...lines.map(line => ctx.measureText(line).width), 0);
+        const lineHeight = Math.round(fontSize * 1.18);
+        const totalHeight = lines.length * lineHeight;
 
-        if (lines.length <= 2 && widest <= maxTextWidth) break;
-        if (lines.length === 3 && widest <= maxTextWidth && fontSize <= 52) break;
+        if (totalHeight <= maxHeight && lines.length <= 6) {
+          return { fontSize, lines, lineHeight };
+        }
 
         fontSize -= 2;
       }
 
-      const lineHeight = Math.round(fontSize * 1.22);
-      const totalHeight = lines.length * lineHeight;
-      const innerHeight = boxH - paddingY * 2;
-      const startY = boxY + paddingY + (innerHeight - totalHeight) / 2 + lineHeight / 2 + 2;
+      ctx.font = `700 ${minFontSize}px Arial`;
+      lines = wrapTextByWidth(ctx, text, maxWidth);
+      return {
+        fontSize: minFontSize,
+        lines: lines.slice(0, 7),
+        lineHeight: Math.round(minFontSize * 1.18)
+      };
+    }
 
-      lines.forEach((line, i) => {
-        ctx.fillText(line, boxX + paddingX, startY + i * lineHeight);
+    function drawQuoteText() {
+      const fallback = 'Thomas ist ein Macher, der ganz genau weiss wo im Gewerbe und auch bei den Familien der Schuh drückt!';
+      const rawText = (inputQuote.value || fallback).trim();
+      const text = rawText || fallback;
+
+      ctx.save();
+      ctx.fillStyle = '#004289';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+
+      const maxWidth = QUOTE_BOX.w;
+      const maxHeight = QUOTE_BOX.h;
+
+      const fitted = fitQuoteText(text, maxWidth, maxHeight);
+
+      ctx.font = `700 ${fitted.fontSize}px Arial`;
+
+      fitted.lines.forEach((line, index) => {
+        ctx.fillText(line, QUOTE_BOX.x, QUOTE_BOX.y + index * fitted.lineHeight);
       });
 
       ctx.restore();
@@ -555,6 +501,7 @@
       ctx.save();
       ctx.beginPath();
       ctx.arc(C.cx, C.cy, C.r, 0, Math.PI * 2);
+      ctx.closePath();
       ctx.clip();
 
       const scale = baseScale * zoom;
@@ -578,37 +525,24 @@
     function drawSupporter() {
       if (userImg) {
         drawCircularUserImage();
-      } else {
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(SUPPORTER_CIRCLE.cx, SUPPORTER_CIRCLE.cy, SUPPORTER_CIRCLE.r, 0, Math.PI * 2);
-        ctx.fillStyle = '#fff7eb';
-        ctx.fill();
-        ctx.lineWidth = SUPPORTER_BORDER.width;
-        ctx.strokeStyle = SUPPORTER_BORDER.color;
-        ctx.stroke();
-        ctx.restore();
       }
 
-      const name = (inputName.value || 'Felix Mustermann').trim() || 'Felix Mustermann';
-      const role = (inputRole.value || 'Geschäftsführer').trim() || 'Geschäftsführer';
-      const org = (inputOrg.value || 'Firma Maximusmann, Wil').trim() || 'Firma Maximusmann, Wil';
+      const name = (inputName.value || 'Vorname Nachname').trim() || 'Vorname Nachname';
+      const role = (inputRole.value || 'Funktion/Ergänzend').trim() || 'Funktion/Ergänzend';
 
       ctx.save();
-      ctx.fillStyle = '#111111';
+      ctx.fillStyle = '#004289';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'alphabetic';
 
-      const textStartX = SUPPORTER_CIRCLE.cx + SUPPORTER_CIRCLE.r + 58;
-      const startY = 1118;
-      const lineHeight = 56;
+      const nameX = 33;
+      const nameY = 900;
 
-      ctx.font = '700 42px Arial';
-      ctx.fillText(name, textStartX, startY);
+      ctx.font = '700 36px Arial';
+      ctx.fillText(name, nameX, nameY);
 
-      ctx.font = '400 34px Arial';
-      ctx.fillText(role, textStartX, startY + lineHeight);
-      ctx.fillText(org, textStartX, startY + lineHeight * 2);
+      ctx.font = '400 28px Arial';
+      ctx.fillText(role, nameX, nameY + 44);
 
       ctx.restore();
     }
@@ -620,7 +554,7 @@
         if (bgLoaded && bgImg.complete && bgImg.naturalWidth > 0) {
           ctx.drawImage(bgImg, 0, 0, CANVAS_W, CANVAS_H);
         } else {
-          ctx.fillStyle = '#f5ad1b';
+          ctx.fillStyle = '#efc987';
           ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
         }
 
@@ -642,8 +576,6 @@
 
         zoomEl.disabled = false;
         btnReset.disabled = false;
-        btnDownload.disabled = false;
-        btnShare.disabled = false;
 
         hideStatus();
         render();
@@ -652,7 +584,7 @@
       }
     });
 
-    [inputQuote, inputName, inputRole, inputOrg].forEach(el => {
+    [inputQuote, inputName, inputRole].forEach(el => {
       el.addEventListener('input', () => {
         updateCounters();
         render();
@@ -682,7 +614,7 @@
     btnDownload.addEventListener('click', () => {
       try {
         const a = document.createElement('a');
-        a.download = 'ThomasAbbt_Banner.png';
+        a.download = 'ThomasAbbt_Testimonial_Banner.png';
         a.href = canvas.toDataURL('image/png');
         a.click();
         hideStatus();
@@ -692,14 +624,9 @@
     });
 
     btnShare.addEventListener('click', async () => {
-      if (!userImg) {
-        setStatus('Bitte zuerst ein Foto hochladen.');
-        return;
-      }
-
       try {
         const blob = await canvasToBlob(canvas, 'image/png');
-        const file = new File([blob], 'ThomasAbbt_Unterstuetzungsbanner.png', { type: 'image/png' });
+        const file = new File([blob], 'ThomasAbbt_Testimonial_Banner.png', { type: 'image/png' });
 
         if (
           navigator.share &&
@@ -708,7 +635,7 @@
         ) {
           await navigator.share({
             files: [file],
-            title: 'Unterstützungsbanner',
+            title: 'Thomas Abbt Testimonial Banner',
             text: 'Mein persönliches Banner für Thomas Abbt'
           });
           hideStatus();
