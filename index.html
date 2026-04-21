@@ -183,6 +183,7 @@
     }
 
     #shareBtn {
+      display: none;
       background: linear-gradient(135deg, #25D366 0%, #1fb856 100%);
       border: none;
       color: #fff;
@@ -251,6 +252,179 @@
       margin-top: 12px;
       color: var(--muted);
       font-size: 13px;
+    }
+
+    @media (min-width: 1600px) {
+      body {
+        padding: 26px 24px;
+      }
+
+      .wrap {
+        max-width: 1600px;
+        gap: 20px;
+      }
+
+      .grid {
+        grid-template-columns: minmax(420px, 500px) minmax(0, 1fr);
+        gap: 20px;
+      }
+
+      .card {
+        padding: 20px;
+        border-radius: 18px;
+      }
+
+      .canvas-card {
+        padding: 16px;
+      }
+
+      .canvas-frame {
+        padding: 14px;
+      }
+
+      .card h2 {
+        font-size: 26px;
+      }
+
+      .intro {
+        font-size: 15px;
+      }
+
+      .field label {
+        font-size: 15px;
+      }
+
+      input[type="text"],
+      textarea,
+      input[type="file"] {
+        padding: 12px 13px;
+      }
+    }
+
+    @media (min-width: 2560px) {
+      body {
+        padding: 36px 32px;
+      }
+
+      .wrap {
+        max-width: 2200px;
+        gap: 24px;
+      }
+
+      .grid {
+        grid-template-columns: minmax(480px, 620px) minmax(0, 1fr);
+        gap: 24px;
+      }
+
+      .card {
+        padding: 24px;
+      }
+
+      .card h2 {
+        font-size: 30px;
+      }
+
+      .intro {
+        font-size: 16px;
+      }
+
+      .download-wrap button {
+        min-width: 260px;
+      }
+    }
+
+    @media (min-width: 3840px) {
+      body {
+        padding: 48px 44px;
+      }
+
+      .wrap {
+        max-width: 3000px;
+        gap: 30px;
+      }
+
+      .grid {
+        grid-template-columns: minmax(560px, 760px) minmax(0, 1fr);
+        gap: 30px;
+      }
+
+      .card {
+        padding: 30px;
+        border-radius: 22px;
+      }
+
+      .card h2 {
+        font-size: 38px;
+        margin-bottom: 14px;
+      }
+
+      .intro {
+        margin-bottom: 18px;
+        font-size: 19px;
+        line-height: 1.55;
+      }
+
+      .field {
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .field label {
+        font-size: 18px;
+      }
+
+      .hint,
+      .counter,
+      .footer-note {
+        font-size: 15px;
+      }
+
+      input[type="text"],
+      textarea,
+      input[type="file"] {
+        padding: 15px 16px;
+        border-radius: 14px;
+        font-size: 18px;
+      }
+
+      textarea {
+        min-height: 130px;
+      }
+
+      input[type="range"] {
+        height: 28px;
+      }
+
+      .canvas-card {
+        padding: 18px;
+      }
+
+      .canvas-frame {
+        padding: 18px;
+        border-radius: 20px;
+      }
+
+      .download-wrap {
+        margin-top: 18px;
+        gap: 14px;
+      }
+
+      .download-wrap button {
+        min-width: 320px;
+      }
+
+      button {
+        min-height: 58px;
+        padding: 14px 24px;
+        border-radius: 16px;
+        font-size: 18px;
+      }
+
+      #download,
+      #shareBtn {
+        font-size: 18px;
+        padding: 14px 24px;
+      }
     }
 
     @media (max-width: 1100px) {
@@ -575,10 +749,14 @@
 
     function canvasToBlob(canvas, type = 'image/png', quality) {
       return new Promise((resolve, reject) => {
-        canvas.toBlob((blob) => {
-          if (blob) resolve(blob);
-          else reject(new Error('Blob konnte nicht erstellt werden'));
-        }, type, quality);
+        try {
+          canvas.toBlob((blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error('Blob konnte nicht erstellt werden'));
+          }, type, quality);
+        } catch (err) {
+          reject(err);
+        }
       });
     }
 
@@ -766,6 +944,32 @@
       }
     }
 
+    function isIOSDevice() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    }
+
+    function isEmbedded() {
+      try {
+        return window.self !== window.top;
+      } catch (err) {
+        return true;
+      }
+    }
+
+    function canUseShareFeature() {
+      if (!window.isSecureContext) return false;
+      if (isEmbedded()) return false;
+      if (isIOSDevice()) return false;
+      if (typeof navigator.share !== 'function') return false;
+      if (typeof window.File !== 'function') return false;
+      return true;
+    }
+
+    function updateShareVisibility() {
+      btnShare.style.display = canUseShareFeature() ? 'inline-flex' : 'none';
+    }
+
     inputPhoto.addEventListener('change', async () => {
       const file = inputPhoto.files && inputPhoto.files[0];
       if (!file) return;
@@ -840,11 +1044,13 @@
           });
           hideStatus();
         } else {
+          btnShare.style.display = 'none';
           setStatus('Direktes Teilen wird auf diesem Gerät oder Browser nicht unterstützt. Bitte das Banner herunterladen und anschliessend manuell teilen.');
         }
       } catch (err) {
         if (err && err.name === 'AbortError') return;
-        setStatus('Das Teilen konnte nicht gestartet werden.');
+        btnShare.style.display = 'none';
+        setStatus('Das Teilen konnte nicht gestartet werden. Bitte das Banner herunterladen und anschliessend manuell teilen.');
       }
     });
 
@@ -899,6 +1105,7 @@
     };
 
     updateCounters();
+    updateShareVisibility();
     bgImg.src = BG_URL;
   </script>
 </body>
