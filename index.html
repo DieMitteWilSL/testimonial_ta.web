@@ -183,7 +183,6 @@
     }
 
     #shareBtn {
-      display: none;
       background: linear-gradient(135deg, #25D366 0%, #1fb856 100%);
       border: none;
       color: #fff;
@@ -252,69 +251,6 @@
       margin-top: 12px;
       color: var(--muted);
       font-size: 13px;
-    }
-
-    @media (min-width: 3840px) {
-      body {
-        padding: 40px 32px;
-      }
-
-      .wrap {
-        max-width: 3000px;
-        gap: 28px;
-      }
-
-      .grid {
-        grid-template-columns: minmax(600px, 800px) minmax(0, 1fr);
-        gap: 28px;
-      }
-
-      .card {
-        padding: 28px;
-      }
-
-      .card h2 {
-        font-size: 34px;
-      }
-
-      .intro {
-        font-size: 18px;
-      }
-
-      .field label {
-        font-size: 17px;
-      }
-
-      .hint,
-      .counter,
-      .footer-note {
-        font-size: 14px;
-      }
-
-      input[type="text"],
-      textarea,
-      input[type="file"] {
-        font-size: 17px;
-        padding: 14px 15px;
-      }
-
-      textarea {
-        min-height: 120px;
-      }
-
-      .canvas-frame {
-        padding: 16px;
-      }
-
-      .download-wrap button {
-        min-width: 300px;
-      }
-
-      button {
-        font-size: 17px;
-        padding: 14px 22px;
-        min-height: 56px;
-      }
     }
 
     @media (max-width: 1100px) {
@@ -639,14 +575,10 @@
 
     function canvasToBlob(canvas, type = 'image/png', quality) {
       return new Promise((resolve, reject) => {
-        try {
-          canvas.toBlob((blob) => {
-            if (blob) resolve(blob);
-            else reject(new Error('Blob konnte nicht erstellt werden'));
-          }, type, quality);
-        } catch (err) {
-          reject(err);
-        }
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error('Blob konnte nicht erstellt werden'));
+        }, type, quality);
       });
     }
 
@@ -834,33 +766,6 @@
       }
     }
 
-    function isIOSDevice() {
-      return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    }
-
-    function isEmbedded() {
-      try {
-        return window.self !== window.top;
-      } catch (err) {
-        return true;
-      }
-    }
-
-    function canUseShareFeature() {
-      if (!window.isSecureContext) return false;
-      if (isEmbedded()) return false;
-      if (isIOSDevice()) return false;
-      if (typeof navigator.share !== 'function') return false;
-      if (typeof navigator.canShare !== 'function') return false;
-      if (typeof window.File !== 'function') return false;
-      return true;
-    }
-
-    function updateShareVisibility() {
-      btnShare.style.display = canUseShareFeature() ? 'inline-flex' : 'none';
-    }
-
     inputPhoto.addEventListener('change', async () => {
       const file = inputPhoto.files && inputPhoto.files[0];
       if (!file) return;
@@ -923,7 +828,11 @@
         const blob = await canvasToBlob(canvas, 'image/png');
         const file = new File([blob], 'ThomasAbbt_Testimonial_Banner.png', { type: 'image/png' });
 
-        if (navigator.canShare({ files: [file] })) {
+        if (
+          navigator.share &&
+          navigator.canShare &&
+          navigator.canShare({ files: [file] })
+        ) {
           await navigator.share({
             files: [file],
             title: 'Thomas Abbt Testimonial Banner',
@@ -931,13 +840,11 @@
           });
           hideStatus();
         } else {
-          btnShare.style.display = 'none';
           setStatus('Direktes Teilen wird auf diesem Gerät oder Browser nicht unterstützt. Bitte das Banner herunterladen und anschliessend manuell teilen.');
         }
       } catch (err) {
         if (err && err.name === 'AbortError') return;
-        btnShare.style.display = 'none';
-        setStatus('Das Teilen konnte nicht gestartet werden. Bitte das Banner herunterladen und anschliessend manuell teilen.');
+        setStatus('Das Teilen konnte nicht gestartet werden.');
       }
     });
 
@@ -992,7 +899,6 @@
     };
 
     updateCounters();
-    updateShareVisibility();
     bgImg.src = BG_URL;
   </script>
 </body>
