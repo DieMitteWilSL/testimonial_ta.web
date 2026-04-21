@@ -254,176 +254,66 @@
       font-size: 13px;
     }
 
-    @media (min-width: 1600px) {
-      body {
-        padding: 26px 24px;
-      }
-
-      .wrap {
-        max-width: 1600px;
-        gap: 20px;
-      }
-
-      .grid {
-        grid-template-columns: minmax(420px, 500px) minmax(0, 1fr);
-        gap: 20px;
-      }
-
-      .card {
-        padding: 20px;
-        border-radius: 18px;
-      }
-
-      .canvas-card {
-        padding: 16px;
-      }
-
-      .canvas-frame {
-        padding: 14px;
-      }
-
-      .card h2 {
-        font-size: 26px;
-      }
-
-      .intro {
-        font-size: 15px;
-      }
-
-      .field label {
-        font-size: 15px;
-      }
-
-      input[type="text"],
-      textarea,
-      input[type="file"] {
-        padding: 12px 13px;
-      }
-    }
-
-    @media (min-width: 2560px) {
-      body {
-        padding: 36px 32px;
-      }
-
-      .wrap {
-        max-width: 2200px;
-        gap: 24px;
-      }
-
-      .grid {
-        grid-template-columns: minmax(480px, 620px) minmax(0, 1fr);
-        gap: 24px;
-      }
-
-      .card {
-        padding: 24px;
-      }
-
-      .card h2 {
-        font-size: 30px;
-      }
-
-      .intro {
-        font-size: 16px;
-      }
-
-      .download-wrap button {
-        min-width: 260px;
-      }
-    }
-
     @media (min-width: 3840px) {
       body {
-        padding: 48px 44px;
+        padding: 40px 32px;
       }
 
       .wrap {
         max-width: 3000px;
-        gap: 30px;
+        gap: 28px;
       }
 
       .grid {
-        grid-template-columns: minmax(560px, 760px) minmax(0, 1fr);
-        gap: 30px;
+        grid-template-columns: minmax(600px, 800px) minmax(0, 1fr);
+        gap: 28px;
       }
 
       .card {
-        padding: 30px;
-        border-radius: 22px;
+        padding: 28px;
       }
 
       .card h2 {
-        font-size: 38px;
-        margin-bottom: 14px;
+        font-size: 34px;
       }
 
       .intro {
-        margin-bottom: 18px;
-        font-size: 19px;
-        line-height: 1.55;
-      }
-
-      .field {
-        gap: 8px;
-        margin-bottom: 16px;
+        font-size: 18px;
       }
 
       .field label {
-        font-size: 18px;
+        font-size: 17px;
       }
 
       .hint,
       .counter,
       .footer-note {
-        font-size: 15px;
+        font-size: 14px;
       }
 
       input[type="text"],
       textarea,
       input[type="file"] {
-        padding: 15px 16px;
-        border-radius: 14px;
-        font-size: 18px;
+        font-size: 17px;
+        padding: 14px 15px;
       }
 
       textarea {
-        min-height: 130px;
-      }
-
-      input[type="range"] {
-        height: 28px;
-      }
-
-      .canvas-card {
-        padding: 18px;
+        min-height: 120px;
       }
 
       .canvas-frame {
-        padding: 18px;
-        border-radius: 20px;
-      }
-
-      .download-wrap {
-        margin-top: 18px;
-        gap: 14px;
+        padding: 16px;
       }
 
       .download-wrap button {
-        min-width: 320px;
+        min-width: 300px;
       }
 
       button {
-        min-height: 58px;
-        padding: 14px 24px;
-        border-radius: 16px;
-        font-size: 18px;
-      }
-
-      #download,
-      #shareBtn {
-        font-size: 18px;
-        padding: 14px 24px;
+        font-size: 17px;
+        padding: 14px 22px;
+        min-height: 56px;
       }
     }
 
@@ -962,6 +852,7 @@
       if (isEmbedded()) return false;
       if (isIOSDevice()) return false;
       if (typeof navigator.share !== 'function') return false;
+      if (typeof navigator.canShare !== 'function') return false;
       if (typeof window.File !== 'function') return false;
       return true;
     }
@@ -1032,11 +923,7 @@
         const blob = await canvasToBlob(canvas, 'image/png');
         const file = new File([blob], 'ThomasAbbt_Testimonial_Banner.png', { type: 'image/png' });
 
-        if (
-          navigator.share &&
-          navigator.canShare &&
-          navigator.canShare({ files: [file] })
-        ) {
+        if (navigator.canShare({ files: [file] })) {
           await navigator.share({
             files: [file],
             title: 'Thomas Abbt Testimonial Banner',
