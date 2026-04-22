@@ -678,11 +678,20 @@
     function setStatus(message) {
       statusEl.style.display = 'block';
       statusEl.textContent = message;
+      sendHeight();
     }
 
     function hideStatus() {
       statusEl.style.display = 'none';
       statusEl.textContent = '';
+      sendHeight();
+    }
+
+    function sendHeight() {
+      window.parent.postMessage(
+        { iframeHeight: document.body.scrollHeight },
+        '*'
+      );
     }
 
     function setupInitialTransform() {
@@ -884,6 +893,7 @@
 
     function updateShareVisibility() {
       btnShare.style.display = canUseShareFeature() ? 'inline-flex' : 'none';
+      sendHeight();
     }
 
     inputPhoto.addEventListener('change', async () => {
@@ -899,6 +909,7 @@
 
         hideStatus();
         render();
+        sendHeight();
       } catch (err) {
         setStatus('Das gewählte Foto konnte nicht geladen werden.');
       }
@@ -908,6 +919,7 @@
       el.addEventListener('input', () => {
         updateCounters();
         render();
+        sendHeight();
       });
     });
 
@@ -923,12 +935,14 @@
 
       clampOffsets();
       render();
+      sendHeight();
     });
 
     btnReset.addEventListener('click', () => {
       if (!userImg) return;
       setupInitialTransform();
       render();
+      sendHeight();
     });
 
     btnDownload.addEventListener('click', () => {
@@ -958,11 +972,13 @@
         } else {
           btnShare.style.display = 'none';
           setStatus('Direktes Teilen wird auf diesem Gerät oder Browser nicht unterstützt. Bitte das Banner herunterladen und anschliessend manuell teilen.');
+          sendHeight();
         }
       } catch (err) {
         if (err && err.name === 'AbortError') return;
         btnShare.style.display = 'none';
         setStatus('Das Teilen konnte nicht gestartet werden. Bitte das Banner herunterladen und anschliessend manuell teilen.');
+        sendHeight();
       }
     });
 
@@ -1008,13 +1024,18 @@
       bgLoaded = true;
       hideStatus();
       render();
+      sendHeight();
     };
 
     bgImg.onerror = () => {
       bgLoaded = false;
       setStatus('Das Hintergrundbild konnte nicht geladen werden.');
       render();
+      sendHeight();
     };
+
+    window.addEventListener('load', sendHeight);
+    window.addEventListener('resize', sendHeight);
 
     updateCounters();
     updateShareVisibility();
